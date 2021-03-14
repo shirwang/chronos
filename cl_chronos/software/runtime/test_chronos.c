@@ -240,6 +240,9 @@ int main(int argc, char **argv) {
     if (strcmp(str_app, "silo") ==0) {
         app = APP_SILO;
     }
+    if (strcmp(str_app, "mis") ==0) {
+        app = APP_MIS;
+    }
     if (argc >=4 ) fhex = fopen(argv[cur_arg+2], "r"); // code hex
     if ( (app > 0) & (argc <3)) {
         printf("Need input file\n");
@@ -831,6 +834,16 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
 
             pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ, 0 );
             break;
+        case APP_MIS:
+            printf("APP_MIS\n");
+
+            pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_OBJECT , 0 );
+            pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_TTYPE, 0 );
+            pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_ARG_WORD, 0 );
+            pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_ARGS , 0 );
+
+            pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ, 0 );
+            break;
 
     }
     printf("Starting Applicaton\n");
@@ -1343,6 +1356,9 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
                 }
            }
            printf("Verification complete. %d/%d errors\n", num_errors, lSizeRef/4);
+           break;
+        case APP_MIS:
+           printf("Verification complete.\n");
            break;
 
    }
