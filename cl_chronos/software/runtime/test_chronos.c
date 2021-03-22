@@ -570,6 +570,12 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
     if (app == APP_SILO) {
         //headers[31] = 1;
     }
+    if (app == APP_MIS) {
+        // ADDR_BASE_FLAGS = 5 << 2;
+        // ADDR_BASE_NEIGHBORS = 3 << 2;
+        // ADDR_BASE_DEGREE = 4 << 2;
+        // ADDR_TOTAL_V = 1 << 2;
+    }
     uint32_t numV = headers[1];
     uint32_t numE = headers[2];;
 
@@ -839,7 +845,6 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
 
             pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_OBJECT , 0 );
             pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_TTYPE, 0 );
-            pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_ARG_WORD, 0 );
             pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_ARGS , 0 );
 
             pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ, 0 );
@@ -1357,7 +1362,7 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
            }
            printf("Verification complete. %d/%d errors\n", num_errors, lSizeRef/4);
            break;
-        case APP_MIS:
+      case APP_MIS:
            printf("Verification complete.\n");
            break;
 

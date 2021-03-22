@@ -32,10 +32,11 @@
 // const int ADDR_INIT_BASE_NEIGHBORS = 9 << 2;
 // const int use_seq_number = 1;
 
-//shirley: don't know how this works, set to 0 for now
-const int ADDR_BASE_FLAGS = 5 << 2;
-const int ADDR_BASE_NEIGHBORS = 3 << 2;
-const int ADDR_BASE_DEGREE = 4 << 2;
+//shirley: don't know how this works
+const int ADDR_BASE_FLAGS = 3 << 2;
+const int ADDR_BASE_NEIGHBORS = 4 << 2;
+const int ADDR_BASE_DEGREE = 5 << 2;
+const int ADDR_TOTAL_V = 1 << 2;
 
 
 // int* gate_state;
@@ -56,30 +57,47 @@ const int ADDR_BASE_DEGREE = 4 << 2;
 //   vertex(long* N, long d) : Neighbors(N), degree(d) {}
 // };
 
-char* Flags;
+int* Flags;
 //vertex* G;
-long** Neighbors;
-long* degree;
+//long** Neighbors;
+int* Neighbors; //total_v * total_v
+int* degree;
+unsigned int total_v;
 // }
 
 // #define DES_TASK  0
 // #define ENQUEUER_TASK  1
 
-#define EXCLUDE_TASK  0
-#define TASK_TASK  1
-#define FILTER_TASK 2
-#define ENQUEUER_TASK 3
+#define INITIAL_ENQUEUE_TASK 0
+#define EXCLUDE_TASK 1
+#define TASK_TASK 2
+#define FILTER_TASK 3
+#define ENQUEUER_TASK 4
+
+void initial_enqueuer_task(uint ts, uint comp, uint start_v) {
+    //enqueue 7 exclude tasks
+    unsigned int v;
+    for (v = start_v; v < start_v+7; v++) {
+        if (v < total_v) {
+            enq_task_arg1(TASK_TASK, v+1, v/*comp*/, v);
+        }
+    }
+    //enqueue 1 enqueuer task
+    if (v < total_v) {
+        enq_task_arg1(INITIAL_ENQUEUE_TASK, ts, comp /*comp*/, v);
+    }
+}
 
 void enqueuer_task(uint ts, uint comp, uint start_n, uint64_t i) {
-    long n = degree[i];
-    long* neighbors = Neighbors[i];
+    int n = degree[i];
+    int* neighbors = Neighbors + i*total_v;
 
-    long ngh_cnt;
+    int ngh_cnt;
 
     //enqueue 7 exclude tasks
     for (ngh_cnt = start_n; ngh_cnt < start_n+7; ngh_cnt++) {
         if (ngh_cnt < n) {
-            long ngh = neighbors[ngh_cnt];
+            int ngh = neighbors[ngh_cnt];
             enq_task_arg1(EXCLUDE_TASK, ts, ngh /*comp*/, Flags + ngh);
         }
     }
@@ -107,10 +125,10 @@ inline void task(uint ts, uint comp, uint64_t i) {
 
     //long n = G[i].degree;
     //long* neighbors = G[i].Neighbors;
-    long n = degree[i];
-    long* neighbors = Neighbors[i];
+    //long n = degree[i];
+    //long* neighbors = Neighbors + i*total_v;
 
-    enq_task_arg2(ENQUEUER_TASK, ts, ngh /*comp*/, 0, i);
+    enq_task_arg2(ENQUEUER_TASK, ts, comp /*comp*/, 0, i);
 
 
     // swarm::enqueue_all<EnqFlags(NOHINT | MAYSPEC)>(
@@ -127,11 +145,11 @@ inline void task(uint ts, uint comp, uint64_t i) {
   }
 }
 
-//shirley: TASK!
+//shirley: TASK! not used...
 //inline void filter(swarm::Timestamp, uint64_t i, swarm::Timestamp dts) {
 inline void filter(uint ts, uint comp, uint64_t i, uint dts) {
   if (Flags[i] == 0) {
-    enq_task_arg1(TASK_TASK, i/*comp*/, dts, i);
+    enq_task_arg1(TASK_TASK, dts, i/*comp*/, i);
     //swarm::enqueue(task, dts, EnqFlags(SAMEHINT | MAYSPEC), i);
   } else {
     // We filtered out an excluded vertex using ordering (ts) less strict than
@@ -143,14 +161,18 @@ void main() {
     chronos_init();
 
     //shirley: don't know how this works
-    Flags = (char*) ((*(int *) (ADDR_BASE_FLAGS))<<2) ;
-    Neighbors  =(long**) ((*(int *)(ADDR_BASE_NEIGHBORS))<<2) ;
-    degree  =(long*) ((*(int *)(ADDR_BASE_DEGREE))<<2) ;
+    Flags = (int*) ((*(int *) (ADDR_BASE_FLAGS))<<2) ;
+    Neighbors = (int*) ((*(int *)(ADDR_BASE_NEIGHBORS))<<2) ;
+    degree  = (int*) ((*(int *)(ADDR_BASE_DEGREE))<<2) ;
+    total_v  = *(uint *)(ADDR_TOTAL_V) ;
 
     while (1) {
         uint ttype, ts, object, arg0, arg1;
-        deq_task_arg2(&ttype, &ts, &object, &arg0, &arg1);
+        deq_task_arg1(&ttype, &ts, &object, &arg0);
         switch(ttype) {
+            case INITIAL_ENQUEUE_TASK:
+                initial_enqueuer_task(ts, object, arg0);
+                break;
             case EXCLUDE_TASK:
                 excludeIfNotFG(ts, object, arg0);
                 break;
@@ -170,3 +192,54 @@ void main() {
     }
 }
 
+
+// validation:
+// // Checks if valid maximal independent set
+// int checkMaximalIndependentSet(graph<intT> G, intT* Flags) {
+//   intT n = G.n;
+//   vertex<intT>* V = G.V;
+//   for (intT i=0; i < n; i++) {
+//     intT nflag;
+//     for (intT j=0; j < V[i].degree; j++) {
+//       intT ngh = V[i].Neighbors[j];
+//       if (Flags[ngh] == 1)
+//     if (Flags[i] == 1) {
+//       cout << "checkMaximalIndependentSet: bad edge " 
+//            << i << "," << ngh << endl;
+//       return 1;
+//     } else nflag = 1;
+//     }
+//     if ((Flags[i] != 1) && (nflag != 1)) {
+//       cout << "checkMaximalIndependentSet: bad vertex " << i << endl;
+//       return 1;
+//     }
+//   }
+//   return 0;
+// }
+
+// Checks if valid maximal independent set
+// int checkMaximalIndependentSet(graph<intT> G, intT* Flags) {
+//   intT n = G.n;
+//   vertex<intT>* V = G.V;
+//   for (intT i=0; i < n; i++) {
+//     intT nflag = 0;
+//     for (intT j=0; j < V[i].degree; j++) {
+//       intT ngh = V[i].Neighbors[j];
+//       if (Flags[ngh] == 1) {
+//         if (Flags[i] == 1) {
+//           fprintf(stderr, "checkMaxmimalIndependentSet: bad edge %d, %d\n", i, ngh);
+//           std::abort();
+//         } else nflag = 1;
+//       }
+//     }
+//     if ((Flags[i] == 2) && (nflag != 1)) {
+//       fprintf(stderr, "checkMaxmimalIndependentSet: excluded vertex with no included neighbor %d\n", i);
+//       std::abort();
+//     } else if ( Flags[i] == 0 ) {
+//       fprintf(stderr, "checkMaxmimalIndependentSet: unvisited vertex %d\n", i);
+//       std::abort();
+//     }
+//   }
+//   std::cout << "checkMaximalIndependentSet: valid mis ";
+//   return 0;
+// }
