@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include <stdio.h>
 #include <fstream>
+#include <string.h>
 using namespace std;
 
 
@@ -41,7 +42,7 @@ bool neighbor_exist(int me, int my_neighbor) {
 int main()
 {
    total_v = 10;
-   double prob_edge = 0.6;
+   double prob_edge = 0.25;
    // int total_e = (total_v * (total_v - 1) / 2) * prob;
 
    Flags = (int*) malloc(total_v * sizeof(int));
@@ -100,7 +101,7 @@ int main()
    uint32_t* data = (uint32_t*) calloc(BASE_END, sizeof(uint32_t));
 
    data[0] = MAGIC_OP;
-   data[1] = numV;
+   data[1] = total_v;
    data[2] = 0;// numE;
    data[3] = BASE_FLAGS;
    data[4] = BASE_NEIGHBORS;
