@@ -41,7 +41,7 @@ bool neighbor_exist(int me, int my_neighbor) {
 
 int main()
 {
-   total_v = 10;
+   total_v = 100;
    double prob_edge = 0.25;
    // int total_e = (total_v * (total_v - 1) / 2) * prob;
 
