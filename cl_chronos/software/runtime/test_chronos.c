@@ -1364,6 +1364,7 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
            break;
       case APP_MIS:
            printf("Verification complete.\n");
+           //read *Flags from fpga, compare with solution file
            break;
 
    }

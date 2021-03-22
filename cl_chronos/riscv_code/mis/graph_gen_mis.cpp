@@ -156,6 +156,54 @@ int main()
 
    fclose(fp_result);
 
+   //printing generated graph
+   printf("DEGREES\n");
+   for (unsigned int v = 0; v < total_v; v++) {
+      printf("%d ", degree[v]);
+   }
+   printf("\n");
+   printf("NEIGHBORS\n");
+   for (unsigned int v = 0; v < total_v; v++) {
+      for (unsigned int vv = 0; vv < total_v; vv++) {
+         printf("%d ", Neighbors[v*total_v+vv]);
+      }
+      printf("\n");
+   }
+   printf("\n");
+
+
+   // Checks if valid maximal independent set
+   printf("VALIDATING RESULTS\n");
+   for (unsigned int v = 0; v < total_v; v++) {
+      if (Flags[v] == 0) {
+         printf("ERROR: unvisited vertex %d!\n", v);
+      }
+      if (Flags[v] == 1) {
+         int* my_nghs = Neighbors + v*total_v;
+         for (unsigned int i = 0; i < degree[v]; i++) {
+            if (Flags[my_nghs[i]] == 1) {
+               printf("ERROR! Me: %d, My neighbor %d is also 1?!\n", v, my_nghs[i]);
+            }
+            if (Flags[my_nghs[i]] != 2) {
+               printf("ERROR! Me: %d, my neighbor %d is not 2?!\n", v, my_nghs[i]);
+            }
+         }
+      }
+      if (Flags[v] == 2) {
+         bool found_ngh = false;
+         int* my_nghs = Neighbors + v*total_v;
+         for (unsigned int i = 0; i < degree[v]; i++) {
+            if (Flags[my_nghs[i]] == 1) {
+               found_ngh = true;
+               break;
+            }
+         }
+         if (!found_ngh) {
+            printf("ERROR! excluded vertex %d with no included neighbor\n", v);
+         }
+      }
+   }
+
    free(data);
    free(Flags);
    free(Neighbors);
