@@ -1363,8 +1363,30 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
            printf("Verification complete. %d/%d errors\n", num_errors, lSizeRef/4);
            break;
       case APP_MIS:
+           //read reference solution
+           printf("Reading mis_graph_solution\n");
+           FILE* fref = fopen("../../riscv_code/mis/mis_graph_solution", "rb");
+           fseek (fref , 0 , SEEK_END);
+           long lSizeRef = ftell (fref);
+           printf("File %p size %ld\n", fg, lSizeRef);
+           rewind (fref);
+           int* ref = (int *) malloc(lSizeRef);
+           fread( (void*) ref, 1, lSizeRef, fref);
+
+           //read results from fpga
+           results = (int*) malloc(4*(numV+16));
+           for (int i=0;i<numV/16 +1;i++){
+               fpga_dma_burst_read(read_fd, (uint8_t*) (results + i*16), 16*4, 64 + i*64);
+           }
+           //compare results to reference solution
+           FILE* fs = fopen("mis_verif", "w");
+           for (int i=0;i<numV;i++) {
+               fprintf(fs, "vid:%8d flag:%8d, ref_flag:%8d, %s\n",
+                               i, results[i], ref[i],
+                               results[i] == ref[i] ? "MATCH" : "FAIL");
+           }
+           fclose(fs);
            printf("Verification complete.\n");
-           //read *Flags from fpga, compare with solution file
            break;
 
    }
