@@ -17,6 +17,7 @@
 
 INCLUDES = -I$(SDK_DIR)/userspace/include
 
+#/Users/shir/Library/xPacks/@xpack-dev-tools/riscv-none-embed-gcc/10.1.0-1.1.1/.content/bin/
 CC = riscv-none-embed-gcc
 CFLAGS = -march=rv32i -mabi=ilp32 -T linker_script 
 
