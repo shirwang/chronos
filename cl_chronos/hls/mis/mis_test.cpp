@@ -97,7 +97,7 @@ int main () {
 	  //printf("File len %d %d\n", i, mem[i]);
 	  i++;
   }
-  task_t initial_task = {0,0,0};
+  task_t initial_task = {0,0,0,0};
   pq.push(initial_task);
 
   while(!pq.empty()) {

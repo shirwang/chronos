@@ -77,7 +77,7 @@ typedef struct {
 	ap_uint<32> ts;
 	ap_uint<32> object;
 	ap_uint<4> ttype;
-	ap_uint<1> args;
+	ap_uint<64> args; //31:0 arg 1, 63:32 arg2
 } task_t;
 
 typedef struct {

@@ -70,7 +70,12 @@ ALL TIMES.
 
 #include "math.h"
 #include <string.h>
-//#define BURST  // Slightly better. (avg. task length reduces by 3)
+
+#define INITIAL_ENQUEUE_TASK 0
+#define EXCLUDE_TASK 1
+#define TASK_TASK 2
+#define FILTER_TASK 3
+#define ENQUEUER_TASK 4
 
 
 void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hls::stream<undo_log_t>* undo_log_entry) {
@@ -88,9 +93,10 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 	int i;
 
 	static ap_uint<1> initialized = 0;
-	static ap_uint<32> base_offset;
-	static ap_uint<32> base_neighbor;
-	static ap_uint<32> base_dist;
+	static ap_int<32> base_flags;
+	static ap_int<32> base_neighbor;
+	static ap_int<32> base_degree;
+	static ap_uint<32> total_v;
 
 #ifdef BURST
 	ap_uint<32> edge_buf[16];
@@ -98,44 +104,99 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 
 	if (!initialized) {
 		initialized = 1;
-		base_offset = l1[3];
+		base_flags = l1[3];
 		base_neighbor = l1[4];
-		base_dist = l1[5];
+		base_degree = l1[5];
+		total_v = l1[1];
 		//printf("base %d %d\n", base_offset, base_neighbor);
 	}
 
-	ap_uint<32> vid = task_in.object;
-
-	ap_uint<32> cur_dist = l1[base_dist + vid];
-	if (task_in.ts < cur_dist ) {
-
-		l1[base_dist +vid] = task_in.ts;
-
-		ap_uint<32> offset_begin = l1[base_offset + vid];
-		ap_uint<32> offset_end = l1[base_offset + vid+1];
-
-#ifdef BURST
-		memcpy(edge_buf, (const ap_uint<32>*) (l1 + (base_neighbor + offset_begin*2)), 4*2*(offset_end - offset_begin));
-		for (i=0; i < offset_end-offset_begin; i++) {
-			task_t child = {task_in.ts + edge_buf[i*2+1], edge_buf[i*2], 0, 0};
+	////////////////////////////// MIS //////////////////////////////
+	if (task_in.ttype == INITIAL_ENQUEUE_TASK) {
+		ap_uint<32> start_v = task_in.args.range(31,0);
+		//enqueue 7 exclude tasks
+	    ap_uint<32> v;
+	    for (v = start_v; v < start_v+7; v++) {
+	        if (v < total_v) {
+	            //enqueue children task
+				ap_uint<64> args_2;
+				args_2.range(31,0) = v;
+				task_t child = {v+1, v, TASK_TASK, args_2};
+				task_out->write(child);
+	        }
+	    }
+	    //enqueue 1 enqueuer task
+	    if (v < total_v) {
+	        //enqueue children task
+			ap_uint<64> args_2;
+			args_2.range(31,0) = v;
+			task_t child = {task_in.ts, task_in.object, INITIAL_ENQUEUE_TASK, args_2};
 			task_out->write(child);
-		}
-#else
-		for (i=offset_begin; i < offset_end; i++) {
-			ap_uint<32> neighbor = l1[base_neighbor + i*2];
-			ap_uint<32> weight = l1[base_neighbor + i*2+1];
-
-			task_t child = {task_in.ts + weight, neighbor, 0, 0};
-			task_out->write(child);
-		}
-#endif
-		undo_log_t ulog;
-		ulog.addr = (base_dist + vid) << 2;
-		ulog.data = cur_dist;
-		undo_log_entry->write(ulog);
+	    }
 	}
+	else if (task_in.ttype == EXCLUDE_TASK) {
+		ap_uint<32> vid = task_in.object;
+		ap_uint<32> ngh = task_in.args.range(31,0);
+		if (l1[base_flags+ngh] != 2) {
+			ap_uint<32> current_flag = l1[base_flags+ngh];
+			l1[base_flags+ngh] = 2;
+			// update undo log
+			undo_log_t ulog;
+			ulog.addr = (base_flags + ngh) << 2;
+			ulog.data = current_flag;
+			undo_log_entry->write(ulog);
+		}
+	}
+	else if (task_in.ttype == TASK_TASK) {
+		ap_uint<32> vid = task_in.object;
+		if (l1[base_flags +vid] == 0) {
+			// update value
+			l1[base_flags +vid] = 1;
+			// update undo log
+			undo_log_t ulog;
+			ulog.addr = (base_flags + vid) << 2;
+			ulog.data = 0;
+			undo_log_entry->write(ulog);
+			//enqueue children task
+			ap_uint<64> args_2;
+			args_2.range(31,0) = 0;
+			args_2.range(63,32) = vid;
+			task_t child = {task_in.ts, task_in.object, ENQUEUER_TASK, args_2};
+			task_out->write(child);
+		}
+	}
+	else if (task_in.ttype == FILTER_TASK) {
+		//this task is not used
+	}
+	else if (task_in.ttype == ENQUEUER_TASK) {
+		ap_uint<32> vid = task_in.object;
+		ap_uint<32> start_n = task_in.args.range(31,0);
+		ap_uint<32> i = task_in.args.range(63,32);
 
+		ap_int<32> n = l1[base_degree +vid];
+		ap_int<32> ngh_cnt;
 
+	    //enqueue 7 exclude tasks
+	    for (ngh_cnt = start_n; ngh_cnt < start_n+7; ngh_cnt++) {
+	        if (ngh_cnt < n) {
+	            ap_uint<32> ngh = l1[base_neighbor + i*total_v + ngh_cnt];
+	        	//enqueue children task
+	        	ap_uint<64> args_2;
+	        	args_2.range(31,0) = ngh;
+				task_t child = {task_in.ts, ngh, EXCLUDE_TASK, args_2};
+				task_out->write(child);
+	        }
+	    }
+	    //enqueue 1 enqueuer task
+	    if (ngh_cnt < n) {
+	    	//enqueue children task
+			ap_uint<64> args_2;
+			args_2.range(31,0) = ngh_cnt;
+			args_2.range(63,32) = i;
+			task_t child = {task_in.ts, task_in.object, ENQUEUER_TASK, args_2};
+			task_out->write(child);
+	    }
+	}
 }
 
 

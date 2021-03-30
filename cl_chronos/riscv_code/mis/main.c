@@ -88,7 +88,7 @@ void initial_enqueuer_task(uint ts, uint comp, uint start_v) {
     }
 }
 
-void enqueuer_task(uint ts, uint comp, uint start_n, uint64_t i) {
+void enqueuer_task(uint ts, uint comp, uint start_n, uint i) {
     int n = degree[i];
     int* neighbors = Neighbors + i*total_v;
 
@@ -117,8 +117,8 @@ inline void excludeIfNotFG(uint ts, uint comp, char* flag) {
 }
 
 //shirley: TASK! 
-//inline void task(swarm::Timestamp ts, uint64_t i) {
-inline void task(uint ts, uint comp, uint64_t i) {
+//inline void task(swarm::Timestamp ts, uint i) {
+inline void task(uint ts, uint comp, uint i) {
   if (Flags[i] == 0) {
     undo_log_write(&(Flags[i]), Flags[i]);
     Flags[i] = 1;
@@ -146,8 +146,8 @@ inline void task(uint ts, uint comp, uint64_t i) {
 }
 
 //shirley: TASK! not used...
-//inline void filter(swarm::Timestamp, uint64_t i, swarm::Timestamp dts) {
-inline void filter(uint ts, uint comp, uint64_t i, uint dts) {
+//inline void filter(swarm::Timestamp, uint i, swarm::Timestamp dts) {
+inline void filter(uint ts, uint comp, uint i, uint dts) {
   if (Flags[i] == 0) {
     enq_task_arg1(TASK_TASK, dts, i/*comp*/, i);
     //swarm::enqueue(task, dts, EnqFlags(SAMEHINT | MAYSPEC), i);
