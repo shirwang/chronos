@@ -104,7 +104,7 @@ void enqueuer_task(uint ts, uint comp, uint start_n, uint i) {
     for (ngh_cnt = start_n; ngh_cnt < start_n+7; ngh_cnt++) {
         if (ngh_cnt < n) {
             int ngh = neighbors[ngh_cnt];
-            enq_task_arg1(EXCLUDE_TASK, ts, ngh /*comp*/, Flags + ngh);
+            enq_task_arg1(EXCLUDE_TASK, ts, ngh /*comp*/, ngh);
         }
     }
     //enqueue 1 enqueuer task
@@ -115,10 +115,11 @@ void enqueuer_task(uint ts, uint comp, uint start_n, uint i) {
 
 //shirley: TASK!
 // inline void excludeIfNotFG(swarm::Timestamp, char* flag) {
-inline void excludeIfNotFG(uint ts, uint comp, char* flag) {
-  if (*flag != 2) {
-    undo_log_write(&(*flag), *flag);
-    *flag = 2;
+inline void excludeIfNotFG(uint ts, uint comp, uint ngh) {
+  if (Flags[ngh] != 2) {
+    //undo_log_write(&(*flag), *flag);
+    //undo_log_write(&(Flags[ngh]), Flags[ngh]);
+    Flags[ngh] = 2;
   }
 }
 
@@ -126,7 +127,7 @@ inline void excludeIfNotFG(uint ts, uint comp, char* flag) {
 //inline void task(swarm::Timestamp ts, uint i) {
 inline void task(uint ts, uint comp, uint i) {
   if (Flags[i] == 0) {
-    undo_log_write(&(Flags[i]), Flags[i]);
+    //undo_log_write(&(Flags[i]), Flags[i]);
     Flags[i] = 1;
 
     //long n = G[i].degree;
@@ -178,7 +179,7 @@ void main() {
     FILE* fp = fopen("mis_graph", "r");
     printf("File %p\n", fp);
 
-    i=0;
+    int i=0;
     while (!feof(fp)){
       fscanf(fp, "%8x\n", &mem[i]);
       //printf("File len %d %d\n", i, mem[i]);
@@ -232,7 +233,7 @@ void main() {
     FILE* fref = fopen("mis_graph_solution", "rb");
     fseek (fref , 0 , SEEK_END);
     long lSizeRef = ftell (fref);
-    printf("File %p size %ld\n", fg, lSizeRef);
+    printf("File %p size %ld\n", fref, lSizeRef);
     rewind (fref);
     int* ref = (int *) malloc(lSizeRef);
     fread( (void*) ref, 1, lSizeRef, fref);
@@ -245,7 +246,7 @@ void main() {
         fprintf(fs, "vid:%8d flag:%8d, ref_flag:%8d, %s\n",
                        i, results[i], ref[i],
                        results[i] == ref[i] ? "MATCH" : "FAIL");
-        printf(fs, "vid:%8d flag:%8d, ref_flag:%8d, %s\n",
+        printf("vid:%8d flag:%8d, ref_flag:%8d, %s\n",
                        i, results[i], ref[i],
                        results[i] == ref[i] ? "MATCH" : "FAIL");
     }
