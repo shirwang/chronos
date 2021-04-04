@@ -24,7 +24,7 @@
 #define SIMULATOR_MODE 1
 
 #ifdef SIMULATOR_MODE
-#include "../include/simulator.h"
+#include "simulator.h"
 #else
 #include "../include/chronos.h"
 #endif
@@ -118,7 +118,7 @@ void enqueuer_task(uint ts, uint comp, uint start_n, uint i) {
 inline void excludeIfNotFG(uint ts, uint comp, uint ngh) {
   if (Flags[ngh] != 2) {
     //undo_log_write(&(*flag), *flag);
-    //undo_log_write(&(Flags[ngh]), Flags[ngh]);
+    undo_log_write(&(Flags[ngh]), Flags[ngh]);
     Flags[ngh] = 2;
   }
 }
@@ -127,7 +127,7 @@ inline void excludeIfNotFG(uint ts, uint comp, uint ngh) {
 //inline void task(swarm::Timestamp ts, uint i) {
 inline void task(uint ts, uint comp, uint i) {
   if (Flags[i] == 0) {
-    //undo_log_write(&(Flags[i]), Flags[i]);
+    undo_log_write(&(Flags[i]), Flags[i]);
     Flags[i] = 1;
 
     //long n = G[i].degree;
@@ -210,7 +210,7 @@ void main() {
 
     while (1) {
         uint ttype, ts, object, arg0, arg1;
-        deq_task_arg1(&ttype, &ts, &object, &arg0);
+        deq_task_arg2(&ttype, &ts, &object, &arg0, &arg1);
 #ifdef SIMULATOR_MODE
         if (ttype == -1) break;
 #endif
