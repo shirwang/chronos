@@ -51,9 +51,9 @@ open_project	-reset mis_prj
 # The source file and test bench
 #shirley: need to specify path to this:
 #C:/Users/shirl/Documents/school/ECE1755_project/chronos/cl_chronos/hls/mis/
-add_files			mis.cpp
-add_files -tb	mis_test.cpp
-add_files -tb	mis_graph
+add_files			C:/Users/shirl/Documents/school/ECE1755_project/chronos/cl_chronos/hls/mis/mis.cpp
+add_files -tb	C:/Users/shirl/Documents/school/ECE1755_project/chronos/cl_chronos/hls/mis/mis_test.cpp
+add_files -tb	C:/Users/shirl/Documents/school/ECE1755_project/chronos/cl_chronos/hls/mis/mis_graph
 # Specify the top-level function for synthesis
 set_top		mis_hls
 
