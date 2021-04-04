@@ -91,12 +91,23 @@ int main () {
   FILE* fp = fopen("mis_graph", "r");
   printf("File %p\n", fp);
 
-  i=0;
-  while (!feof(fp)){
-	  fscanf(fp, "%8x\n", &mem[i]);
-	  //printf("File len %d %d\n", i, mem[i]);
-	  i++;
+  // i=0;
+  // while (!feof(fp)){
+	 //  fscanf(fp, "%8x\n", &mem[i]);
+	 //  //printf("File len %d %d\n", i, mem[i]);
+	 //  i++;
+  // }
+     
+  fseek (fp , 0 , SEEK_END);
+  long lSize = ftell (fp);
+  printf("File %p size %ld\n", fp, lSize);
+  rewind (fp);
+  fread( (void*) mem, 1, lSize, fp);
+  for (int i=0;i<16;i++) {
+      printf("headers %d %x \n", i, mem[i]);
   }
+  fclose(fp);
+
   task_t initial_task = {0,0,0,0};
   pq.push(initial_task);
 
