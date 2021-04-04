@@ -21,7 +21,13 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define SIMULATOR_MODE 1
+
+#ifdef SIMULATOR_MODE
+#include "../include/simulator.h"
+#else
 #include "../include/chronos.h"
+#endif
 
 // The location pointing to the base of each of the arrays
 // const int ADDR_BASE_DATA = 5 << 2;
@@ -166,9 +172,38 @@ void main() {
     degree  = (int*) ((*(int *)(ADDR_BASE_DEGREE))<<2) ;
     total_v  = *(uint *)(ADDR_TOTAL_V) ;
 
+#ifdef SIMULATOR_MODE
+    //read input file, setup addresses
+    int mem[1024] = {0};
+    FILE* fp = fopen("mis_graph", "r");
+    printf("File %p\n", fp);
+
+    i=0;
+    while (!feof(fp)){
+      fscanf(fp, "%8x\n", &mem[i]);
+      //printf("File len %d %d\n", i, mem[i]);
+      i++;
+    }
+    fclose(fp);
+
+    int base_flags = mem[3];
+    int base_neighbor = mem[4];
+    int base_degree = mem[5];
+    total_v = mem[1];
+
+    Flags = &mem[base_flags];
+    Neighbors = &mem[base_neighbor];
+    degree  = &mem[base_degree];
+
+    enq_task_arg1(INITIAL_ENQUEUE_TASK,0,0,0);
+#endif
+
     while (1) {
         uint ttype, ts, object, arg0, arg1;
         deq_task_arg1(&ttype, &ts, &object, &arg0);
+#ifdef SIMULATOR_MODE
+        if (ttype == -1) break;
+#endif
         switch(ttype) {
             case INITIAL_ENQUEUE_TASK:
                 initial_enqueuer_task(ts, object, arg0);
@@ -190,4 +225,31 @@ void main() {
         }
         finish_task();
     }
+#ifdef SIMULATOR_MODE
+    //output file or verify result
+    //read reference solution
+    printf("Reading mis_graph_solution\n");
+    FILE* fref = fopen("mis_graph_solution", "rb");
+    fseek (fref , 0 , SEEK_END);
+    long lSizeRef = ftell (fref);
+    printf("File %p size %ld\n", fg, lSizeRef);
+    rewind (fref);
+    int* ref = (int *) malloc(lSizeRef);
+    fread( (void*) ref, 1, lSizeRef, fref);
+    fclose(fref);
+
+    int *results = Flags;
+    //compare results to reference solution
+    FILE* fs = fopen("mis_verif", "w");
+    for (int i=0;i<total_v;i++) {
+        fprintf(fs, "vid:%8d flag:%8d, ref_flag:%8d, %s\n",
+                       i, results[i], ref[i],
+                       results[i] == ref[i] ? "MATCH" : "FAIL");
+        printf(fs, "vid:%8d flag:%8d, ref_flag:%8d, %s\n",
+                       i, results[i], ref[i],
+                       results[i] == ref[i] ? "MATCH" : "FAIL");
+    }
+    fclose(fs);
+    printf("Verification complete.\n");
+#endif
 }

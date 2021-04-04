@@ -88,7 +88,7 @@ int main () {
   std::priority_queue<task_t, std::vector<task_t>, compare_node > pq;
 
   ap_uint<32> mem[1024] = {0};
-  FILE* fp = fopen("input_graph", "r");
+  FILE* fp = fopen("mis_graph", "r");
   printf("File %p\n", fp);
 
   i=0;
