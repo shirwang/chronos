@@ -98,10 +98,6 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 	static ap_int<32> base_degree;
 	static ap_uint<32> total_v;
 
-#ifdef BURST
-	ap_uint<32> edge_buf[16];
-#endif
-
 	if (!initialized) {
 		initialized = 1;
 		base_flags = l1[3];
