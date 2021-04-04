@@ -324,8 +324,8 @@ reg   [63:0] l1_addr_5_reg_1057;
 wire    ap_CS_fsm_state22;
 wire   [191:0] or_ln174_2_fu_687_p2;
 wire   [31:0] ngh_cnt_V_3_fu_699_p2;
-reg   [31:0] l1_addr_3_read_reg_1073;
-reg   [31:0] ulog_data_V_reg_1078;
+reg   [31:0] cur_flag_V_reg_1073;
+reg   [31:0] current_flag_reg_1078;
 wire   [29:0] add_ln213_1_fu_723_p2;
 reg   [29:0] add_ln213_1_reg_1087;
 wire   [63:0] trunc_ln174_1_fu_729_p1;
@@ -680,6 +680,18 @@ always @ (posedge ap_clk) begin
 end
 
 always @ (posedge ap_clk) begin
+    if (((task_in_ttype_V_reg_902 == 4'd2) & (1'b1 == ap_CS_fsm_state40))) begin
+        cur_flag_V_reg_1073 <= l1_RDATA;
+    end
+end
+
+always @ (posedge ap_clk) begin
+    if (((task_in_ttype_V_reg_902 == 4'd1) & (1'b1 == ap_CS_fsm_state40))) begin
+        current_flag_reg_1078 <= l1_RDATA;
+    end
+end
+
+always @ (posedge ap_clk) begin
     if ((1'b1 == ap_CS_fsm_state14)) begin
         i_reg_985 <= {{task_in[191:160]}};
     end
@@ -720,12 +732,6 @@ end
 always @ (posedge ap_clk) begin
     if (((task_in_ttype_V_reg_902 == 4'd1) & (1'b1 == ap_CS_fsm_state12))) begin
         l1_addr_2_reg_961 <= sext_ln534_fu_499_p1;
-    end
-end
-
-always @ (posedge ap_clk) begin
-    if (((task_in_ttype_V_reg_902 == 4'd2) & (1'b1 == ap_CS_fsm_state40))) begin
-        l1_addr_3_read_reg_1073 <= l1_RDATA;
     end
 end
 
@@ -804,12 +810,6 @@ end
 always @ (posedge ap_clk) begin
     if (((l1_RVALID == 1'b1) & (1'b1 == ap_CS_fsm_state11))) begin
         total_v_V <= l1_RDATA;
-    end
-end
-
-always @ (posedge ap_clk) begin
-    if (((task_in_ttype_V_reg_902 == 4'd1) & (1'b1 == ap_CS_fsm_state40))) begin
-        ulog_data_V_reg_1078 <= l1_RDATA;
     end
 end
 
@@ -1564,9 +1564,9 @@ assign grp_fu_542_p10 = i_fu_525_p4;
 
 assign i_fu_525_p4 = {{task_in[191:160]}};
 
-assign icmp_ln870_fu_705_p2 = ((l1_addr_3_read_reg_1073 == 32'd0) ? 1'b1 : 1'b0);
+assign icmp_ln870_fu_705_p2 = ((cur_flag_V_reg_1073 == 32'd0) ? 1'b1 : 1'b0);
 
-assign icmp_ln874_fu_732_p2 = ((ulog_data_V_reg_1078 == 32'd2) ? 1'b1 : 1'b0);
+assign icmp_ln874_fu_732_p2 = ((current_flag_reg_1078 == 32'd2) ? 1'b1 : 1'b0);
 
 assign icmp_ln878_1_fu_600_p2 = (($signed(sext_ln878_fu_596_p1) < $signed(ret_4_cast_reg_1011)) ? 1'b1 : 1'b0);
 
@@ -1598,7 +1598,7 @@ assign or_ln174_4_fu_638_p2 = (tmp5_fu_626_p6 | 192'd73786976294838206464);
 
 assign or_ln174_fu_780_p2 = (tmp1_fu_768_p6 | 192'd73786976294838206464);
 
-assign p_0_fu_787_p4 = {{{ulog_data_V_reg_1078}, {add_ln213_reg_1100}}, {2'd0}};
+assign p_0_fu_787_p4 = {{{current_flag_reg_1078}, {add_ln213_reg_1100}}, {2'd0}};
 
 assign p_Result_1_fu_855_p5 = {{ap_const_lv64_0[63:32]}, {v_V_2_reg_979}};
 

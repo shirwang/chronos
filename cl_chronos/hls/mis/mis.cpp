@@ -145,7 +145,8 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 	}
 	if (task_in.ttype == TASK_TASK) {
 		ap_uint<32> vid = task_in.object;
-		if (l1[base_flags +vid] == 0) {
+		ap_uint<32> cur_flag = l1[base_flags+vid];
+		if (cur_flag == 0) {
 			// update value
 			l1[base_flags +vid] = 1;
 			// update undo log
