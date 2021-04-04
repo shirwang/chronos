@@ -21,7 +21,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define SIMULATOR_MODE 1
+//#define SIMULATOR_MODE 1
 
 #ifdef SIMULATOR_MODE
 #include "simulator.h"
