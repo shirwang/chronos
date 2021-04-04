@@ -179,13 +179,22 @@ void main() {
     FILE* fp = fopen("mis_graph", "r");
     printf("File %p\n", fp);
 
-    int i=0;
-    while (!feof(fp)){
-      fscanf(fp, "%8x\n", &mem[i]);
-      //printf("File len %d %d\n", i, mem[i]);
-      i++;
+    // int i=0;
+    // while (!feof(fp)){
+    //   fscanf(fp, "%8x\n", &mem[i]);
+    //   //printf("File len %d %d\n", i, mem[i]);
+    //   i++;
+    // }
+    // fclose(fp);
+
+    fseek (fp , 0 , SEEK_END);
+    lSize = ftell (fp);
+    printf("File %p size %ld\n", fp, lSize);
+    rewind (fp);
+    fread( (void*) mem, 1, lSize, fp);
+    for (int i=0;i<16;i++) {
+        printf("headers %d %x \n", i, mem[i]);
     }
-    fclose(fp);
 
     int base_flags = mem[3];
     int base_neighbor = mem[4];
