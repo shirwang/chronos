@@ -188,7 +188,7 @@ void main() {
     // fclose(fp);
 
     fseek (fp , 0 , SEEK_END);
-    lSize = ftell (fp);
+    long lSize = ftell (fp);
     printf("File %p size %ld\n", fp, lSize);
     rewind (fp);
     fread( (void*) mem, 1, lSize, fp);
@@ -250,16 +250,16 @@ void main() {
 
     int *results = Flags;
     //compare results to reference solution
-    FILE* fs = fopen("mis_verif", "w");
+    // FILE* fs = fopen("mis_verif", "w");
     for (int i=0;i<total_v;i++) {
-        fprintf(fs, "vid:%8d flag:%8d, ref_flag:%8d, %s\n",
-                       i, results[i], ref[i],
-                       results[i] == ref[i] ? "MATCH" : "FAIL");
+        // fprintf(fs, "vid:%8d flag:%8d, ref_flag:%8d, %s\n",
+        //                i, results[i], ref[i],
+        //                results[i] == ref[i] ? "MATCH" : "FAIL");
         printf("vid:%8d flag:%8d, ref_flag:%8d, %s\n",
                        i, results[i], ref[i],
                        results[i] == ref[i] ? "MATCH" : "FAIL");
     }
-    fclose(fs);
+    // fclose(fs);
     printf("Verification complete.\n");
 #endif
 }
