@@ -41,7 +41,7 @@ bool neighbor_exist(int me, int my_neighbor) {
 
 int main()
 {
-   total_v = 100;
+   total_v = 10;
    double prob_edge = 0.25;
    // int total_e = (total_v * (total_v - 1) / 2) * prob;
 
@@ -83,7 +83,7 @@ int main()
    //print to file
    FILE* fp;
    char out_file[50] = "mis_graph";
-   fp = fopen(out_file, "wb");
+   fp = fopen("mis_graph", "wb");
    printf("Writing file %s %p\n", out_file, fp);
 
    // all offsets are in units of uint32_t ( 4 bytes). i.e 16 per cache line

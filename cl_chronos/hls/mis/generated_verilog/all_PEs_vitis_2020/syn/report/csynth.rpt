@@ -1,0 +1,26 @@
+
+
+================================================================
+== Synthesis Summary Report of 'mis_hls'
+================================================================
++ General Information: 
+    * Date:           Sun Apr  4 18:57:40 2021
+    * Version:        2020.2 (Build 3064766 on Wed Nov 18 09:12:45 MST 2020)
+    * Project:        mis_prj
+    * Solution:       solution1 (Vivado IP Flow Target)
+    * Product family: kintex7
+    * Target device:  xc7k160t-fbg484-1
+    
+
++ Performance & Resource Estimates: 
+    
+    PS: '+' for module; 'o' for loop; '*' for dataflow
+    +---------------------+--------+-------+---------+--------+----------+---------+------+----------+---------+----+-----------+-----------+-----+
+    |       Modules       |  Issue |       | Latency | Latency| Iteration|         | Trip |          |         |    |           |           |     |
+    |       & Loops       |  Type  | Slack | (cycles)|  (ns)  |  Latency | Interval| Count| Pipelined|  BRAM   | DSP|     FF    |    LUT    | URAM|
+    +---------------------+--------+-------+---------+--------+----------+---------+------+----------+---------+----+-----------+-----------+-----+
+    |+ mis_hls            |  Timing|   0.00|        -|       -|         -|        -|     -|        no|  2 (~0%)|   -|  2231 (1%)|  2679 (2%)|    -|
+    | o VITIS_LOOP_115_1  |       -|  -2.92|        -|       -|         2|        -|     -|        no|        -|   -|          -|          -|    -|
+    | o VITIS_LOOP_177_2  |       -|  -2.92|        -|       -|        11|        -|     -|        no|        -|   -|          -|          -|    -|
+    +---------------------+--------+-------+---------+--------+----------+---------+------+----------+---------+----+-----------+-----------+-----+
+

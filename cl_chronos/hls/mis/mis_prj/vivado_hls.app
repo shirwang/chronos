@@ -7,7 +7,7 @@
     </Simulation>
     <files xmlns="">
         <file name="../../mis_test.cpp" sc="0" tb="1" cflags=" -Wno-unknown-pragmas -Wno-unknown-pragmas"/>
-        <file name="../../input_graph" sc="0" tb="1" cflags=" -Wno-unknown-pragmas -Wno-unknown-pragmas"/>
+        <file name="../../mis_graph" sc="0" tb="1" cflags=" -Wno-unknown-pragmas -Wno-unknown-pragmas"/>
         <file name="mis.cpp" sc="0" tb="false" cflags=""/>
     </files>
     <solutions xmlns="">

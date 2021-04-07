@@ -98,10 +98,6 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 	static ap_int<32> base_degree;
 	static ap_uint<32> total_v;
 
-#ifdef BURST
-	ap_uint<32> edge_buf[16];
-#endif
-
 	if (!initialized) {
 		initialized = 1;
 		base_flags = l1[3];
@@ -134,7 +130,7 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 			task_out->write(child);
 	    }
 	}
-	else if (task_in.ttype == EXCLUDE_TASK) {
+	if (task_in.ttype == EXCLUDE_TASK) {
 		ap_uint<32> vid = task_in.object;
 		ap_uint<32> ngh = task_in.args.range(31,0);
 		if (l1[base_flags+ngh] != 2) {
@@ -147,9 +143,10 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 			undo_log_entry->write(ulog);
 		}
 	}
-	else if (task_in.ttype == TASK_TASK) {
+	if (task_in.ttype == TASK_TASK) {
 		ap_uint<32> vid = task_in.object;
-		if (l1[base_flags +vid] == 0) {
+		ap_uint<32> cur_flag = l1[base_flags+vid];
+		if (cur_flag == 0) {
 			// update value
 			l1[base_flags +vid] = 1;
 			// update undo log
@@ -165,10 +162,10 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 			task_out->write(child);
 		}
 	}
-	else if (task_in.ttype == FILTER_TASK) {
+	if (task_in.ttype == FILTER_TASK) {
 		//this task is not used
 	}
-	else if (task_in.ttype == ENQUEUER_TASK) {
+	if (task_in.ttype == ENQUEUER_TASK) {
 		ap_uint<32> vid = task_in.object;
 		ap_uint<32> start_n = task_in.args.range(31,0);
 		ap_uint<32> i = task_in.args.range(63,32);
