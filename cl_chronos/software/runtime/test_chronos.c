@@ -845,6 +845,7 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
 
             pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_OBJECT , 0 );
             pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_TTYPE, 0 );
+	    pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_ARG_WORD, 0 );
             pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ_ARGS , 0 );
 
             pci_poke(0, ID_OCL_SLAVE, OCL_TASK_ENQ, 0 );
@@ -896,7 +897,7 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
     printf("Waiting until app completes\n");
 
     // Stage 6: Wait until Application completes
-
+usleep(1000000);
     ocl_data = 0;
    uint32_t* results;
 
@@ -1336,7 +1337,7 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
            fflush(mf_state);
            break;
       case APP_SILO:
-           printf("Reading silo_ref\n");
+          /* printf("Reading silo_ref\n");
            FILE* fref = fopen("../../riscv_code/silo/silo_ref", "rb");
            fseek (fref , 0 , SEEK_END);
            long lSizeRef = ftell (fref);
@@ -1360,7 +1361,7 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
                     }
                 }
            }
-           printf("Verification complete. %d/%d errors\n", num_errors, lSizeRef/4);
+           printf("Verification complete. %d/%d errors\n", num_errors, lSizeRef/4);*/
            break;
       case APP_MIS:
            //read reference solution
@@ -1373,7 +1374,15 @@ int test_chronos(int slot_id, int pf_id, int bar_id, FILE* fg, int app) {
            int* ref = (int *) malloc(lSizeRef);
            fread( (void*) ref, 1, lSizeRef, fref);
 
-           //read results from fpga
+	   printf("reading debug info\n");
+	   #define DEBUG_LENGTH 7
+	   uint debug[DEBUG_LENGTH];
+	   fpga_dma_burst_read(read_fd, debug, 4*DEBUG_LENGTH, 2048);
+	   printf("debug info:");
+	   for (int i=0; i < DEBUG_LENGTH;i++)
+		printf(" %d", debug[i]);
+	   printf("\n");
+         //read results from fpga
            results = (int*) malloc(4*(numV+16));
            for (int i=0;i<numV/16 +1;i++){
                fpga_dma_burst_read(read_fd, (uint8_t*) (results + i*16), 16*4, 64 + i*64);

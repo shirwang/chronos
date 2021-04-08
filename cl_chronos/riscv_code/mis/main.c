@@ -69,6 +69,8 @@ int* Flags;
 int* Neighbors; //total_v * total_v
 int* degree;
 unsigned int total_v;
+
+uint* debug = (uint*)2048;
 // }
 
 // #define DES_TASK  0
@@ -83,8 +85,10 @@ unsigned int total_v;
 void initial_enqueuer_task(uint ts, uint comp, uint start_v) {
     //enqueue 7 exclude tasks
     unsigned int v;
+    //debug[4] = start_v;
     for (v = start_v; v < start_v+7; v++) {
         if (v < total_v) {
+	    //debug[5] = v;
             enq_task_arg1(TASK_TASK, v+1, v/*comp*/, v);
         }
     }
@@ -92,6 +96,7 @@ void initial_enqueuer_task(uint ts, uint comp, uint start_v) {
     if (v < total_v) {
         enq_task_arg1(INITIAL_ENQUEUE_TASK, ts, comp /*comp*/, v);
     }
+    //debug[6] = 7;
 }
 
 void enqueuer_task(uint ts, uint comp, uint start_n, uint i) {
@@ -213,9 +218,15 @@ void main() {
         deq_task_arg2(&ttype, &ts, &object, &arg0, &arg1);
 #ifdef SIMULATOR_MODE
         if (ttype == -1) break;
+#else
+//	debug[0] = ttype;
+//	debug[1] = arg0;
+//	debug[2] = arg1;
 #endif
+
         switch(ttype) {
             case INITIAL_ENQUEUE_TASK:
+//		debug[3] = 1;
                 initial_enqueuer_task(ts, object, arg0);
                 break;
             case EXCLUDE_TASK:
