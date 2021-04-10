@@ -21,7 +21,16 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../include/chronos.h"
+#define SIMULATOR_MODE 1
+
+//https://zenodo.org/record/3563178/files/chronos-inputs.zip
+//input maxflow inputs/maxflow/genrmf_wide_37_6_1_10000_0.in.flow
+
+#ifdef SIMULATOR_MODE
+#include "simulator.h"
+#else
+//#include "../include/chronos.h"
+#endif
 
 const int ADDR_BASE_DATA         = 5 << 2;
 const int ADDR_BASE_EDGE_OFFSET  = 3 << 2;
@@ -92,8 +101,8 @@ void discharge_start_task(uint ts, uint vid, uint enq_start, uint arg1) {
    }
    uint eo_begin = edge_offset[vid];
    uint eo_end = edge_offset[vid+1];
-   undo_log_write(&(node_prop[vid].counter_min_height),
-           node_prop[vid].counter_min_height);
+   // undo_log_write(&(node_prop[vid].counter_min_height),
+   //         node_prop[vid].counter_min_height);
    node_prop[vid].counter_min_height = (eo_end - eo_begin) << 24 | (2*numV);
 
    eo_begin += enq_start;
@@ -126,7 +135,7 @@ void push_from_task(uint ts, uint vid, uint neighbor_height, uint neighbor_id) {
    uint h = node_prop[vid].height;
    // update counter
    uint counter = node_prop[vid].counter_min_height ;
-   undo_log_write(&(node_prop[vid].counter_min_height), counter);
+   // undo_log_write(&(node_prop[vid].counter_min_height), counter);
    uint min_neighbor = counter & 0xffffff;
    counter = counter >> 24;
 
@@ -146,10 +155,10 @@ void push_from_task(uint ts, uint vid, uint neighbor_height, uint neighbor_id) {
       if (amt > 0) {
          uint reverse_index = edge_neighbors[eo_begin + push_to_index].dest >> 24;
          uint dest = edge_neighbors[eo_begin + push_to_index].dest & 0xffffff;
-         undo_log_write(&(node_prop[vid].flow[push_to_index]), edge_flow);
+         // undo_log_write(&(node_prop[vid].flow[push_to_index]), edge_flow);
          edge_flow += amt;
          node_prop[vid].flow[push_to_index] = edge_flow;
-         undo_log_write(&(node_prop[vid].excess), excess);
+         // undo_log_write(&(node_prop[vid].excess), excess);
          node_prop[vid].excess = excess - amt;
          enq_task_arg2(PUSH_TO_TASK, ts, dest, reverse_index, amt);
       }
@@ -184,9 +193,9 @@ void push_to_task(uint ts, uint vid, uint reverse_index, uint amt) {
    uint excess = node_prop[vid].excess;
    int flow = node_prop[vid].flow[reverse_index];
 
-   undo_log_write(&(node_prop[vid].flow[reverse_index]), flow);
+   // undo_log_write(&(node_prop[vid].flow[reverse_index]), flow);
    node_prop[vid].flow[reverse_index] = flow - amt;
-   undo_log_write(&(node_prop[vid].excess), excess);
+   // undo_log_write(&(node_prop[vid].excess), excess);
    node_prop[vid].excess = excess + amt;
    //excess += amt;
 
@@ -216,10 +225,10 @@ void global_relabel_visit_task(uint ts, uint vid, uint enq_start, uint reverse_e
             //if (cap <= flow) return;
          }
 
-         undo_log_write(&(node_prop[vid].visited), visited);
+         // undo_log_write(&(node_prop[vid].visited), visited);
          node_prop[vid].visited = iteration_no;
          uint old_height = node_prop[vid].height;
-         undo_log_write(&(node_prop[vid].height), old_height);
+         // undo_log_write(&(node_prop[vid].height), old_height);
          uint new_height = ts_height_bits + (is_src_bfs ? numV : 0);
          if (new_height < old_height) {
 
@@ -254,27 +263,93 @@ void global_relabel_visit_task(uint ts, uint vid, uint enq_start, uint reverse_e
 
 }
 
-void main() {
+int main() {
    chronos_init();
 
-   node_prop = (node_prop_t*) ((*(int *) (ADDR_BASE_DATA))<<2) ;
-   edge_offset  =(uint*) ((*(int *)(ADDR_BASE_EDGE_OFFSET))<<2) ;
-   edge_neighbors  =(edge_prop_t*) ((*(int *)(ADDR_BASE_NEIGHBORS))<<2) ;
-   numV  = *(uint *)(ADDR_NUMV) ;
-   src_node  = *(uint *)(ADDR_SRC_NODE) ;
-   sink_node  = *(uint *)(ADDR_SINK_NODE) ;
-   // if more than 1 tile, host should adjust this field before sending it over
-   // to the FPGA
-   log_global_relabel_bits = *(uint *)(10<<2);
-   global_relabel_mask = *(uint *)(ADDR_GLOBAL_RELABEL_MASK) ;
-   ordered_edges = *(uint *)(ADDR_ORDERED_EDGES) ;
-   iteration_mask = *(uint *)(ADDR_ITERATION_MASK) ;
+   // node_prop = (node_prop_t*) ((*(int *) (ADDR_BASE_DATA))<<2) ;
+   // edge_offset  =(uint*) ((*(int *)(ADDR_BASE_EDGE_OFFSET))<<2) ;
+   // edge_neighbors  =(edge_prop_t*) ((*(int *)(ADDR_BASE_NEIGHBORS))<<2) ;
+   // numV  = *(uint *)(ADDR_NUMV) ;
+   // src_node  = *(uint *)(ADDR_SRC_NODE) ;
+   // sink_node  = *(uint *)(ADDR_SINK_NODE) ;
+   // // if more than 1 tile, host should adjust this field before sending it over
+   // // to the FPGA
+   // log_global_relabel_bits = *(uint *)(10<<2);
+   // global_relabel_mask = *(uint *)(ADDR_GLOBAL_RELABEL_MASK) ;
+   // ordered_edges = *(uint *)(ADDR_ORDERED_EDGES) ;
+   // iteration_mask = *(uint *)(ADDR_ITERATION_MASK) ;
 
-   global_relabel_mask = ((1<<(log_global_relabel_bits)) - 1 ) << (TX_ID_OFFSET_BITS);
-   //global_relabel_mask = ~0;
+   // global_relabel_mask = ((1<<(log_global_relabel_bits)) - 1 ) << (TX_ID_OFFSET_BITS);
+   // //global_relabel_mask = ~0;
+
+#ifdef SIMULATOR_MODE
+    //read input file, setup addresses
+    int mem[400*1024*1024] = {0};
+    FILE* fp = fopen("genrmf_wide_37_6_1_10000_0.in.flow", "r");
+    printf("File %p\n", fp);
+
+    fseek (fp , 0 , SEEK_END);
+    long lSize = ftell (fp);
+    printf("File %p size %ld\n", fp, lSize);
+    rewind (fp);
+    fread( (void*) mem, 1, lSize, fp);
+    for (int i=0;i<16;i++) {
+        printf("headers %d %x \n", i, mem[i]);
+    }
+
+    uint32_t log_gr_interval = mem[10];
+    // global relabel interval
+    // bool adjust_relabel_interval = true;
+    // if (adjust_relabel_interval) {
+    //     log_gr_interval += -(int) log2(active_tiles) + 5;
+    //     if (APP_ID == RISCV_ID) log_gr_interval -=2; // manually tuned
+    //     if (log_gr_interval < 5) log_gr_interval = 5;
+
+    // }
+    mem[10] = log_gr_interval;
+    mem[11] = ((1<<log_gr_interval) -1 )<<8;
+    mem[12] = ~((1<<(log_gr_interval+8 ))-1);
+
+    mem[13] = 0; // ordered edges
+    mem[14] = 1; // producer task
+    mem[15] = 0; // bfs non-spec
+
+    int base_data = mem[5];
+    int base_edge_offset = mem[3];
+    int base_neighbors = mem[4];
+    int base_numv = mem[1];
+    int base_global_relabel_mask = mem[11];
+    int base_iteration_mask = mem[12];
+    int base_ordered_edges = mem[13];
+    int base_src_node = mem[7];
+    int base_sink_node = mem[9];
+
+    node_prop = &mem[base_data] ;
+    edge_offset  = &mem[base_edge_offset];
+    edge_neighbors  = &mem[base_neighbor];
+    numV  = mem[1];
+    src_node  = mem[7] ;
+    sink_node  = mem[9] ;
+    // if more than 1 tile, host should adjust this field before sending it over
+    // to the FPGA
+    log_global_relabel_bits = mem[10];
+    global_relabel_mask = mem[11];
+    ordered_edges = mem[13];
+    iteration_mask = mem[12] ;
+
+    global_relabel_mask = ((1<<(log_global_relabel_bits)) - 1 ) << (TX_ID_OFFSET_BITS);
+    //global_relabel_mask = ~0;
+
+    enq_task_arg2(0,0,0,0,0);
+#endif
+
+
    while (1) {
       uint ttype, ts, object, arg0, arg1;
       deq_task_arg2(&ttype, &ts, &object, &arg0, &arg1);
+#ifdef SIMULATOR_MODE
+        if (ttype == -1) break;
+#endif
       switch(ttype) {
         case DISCHARGE_START_TASK:
         case DISCHARGE_START_TASK_CONT:
