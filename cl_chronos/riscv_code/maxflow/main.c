@@ -88,8 +88,8 @@ edge_prop_t* edge_neighbors;
 void discharge_start_task(uint ts, uint vid, uint enq_start, uint arg1) {
 
    if ((ts & global_relabel_mask) == 0) {
-      uint sink = *(uint *)(ADDR_SINK_NODE);
-      uint src  = *(uint *)(ADDR_SRC_NODE);
+      uint sink = sink_node; // *(uint *)(ADDR_SINK_NODE);
+      uint src  = src_node; // *(uint *)(ADDR_SRC_NODE);
       if ( ((ts >> 4) & 0xf) == 0) {
           // TILE_ID == 0
           enq_task_arg1(GLOBAL_RELABEL_VISIT_TASK, ts, sink, 0);
@@ -284,8 +284,8 @@ int main() {
 
 #ifdef SIMULATOR_MODE
     //read input file, setup addresses
-    int mem[400*1024*1024] = {0};
-    FILE* fp = fopen("genrmf_wide_37_6_1_10000_0.in.flow", "r");
+    int mem[1024*1024] = {0};
+    FILE* fp = fopen("maxflow_input", "r");
     printf("File %p\n", fp);
 
     fseek (fp , 0 , SEEK_END);
@@ -304,8 +304,8 @@ int main() {
     //     log_gr_interval += -(int) log2(active_tiles) + 5;
     //     if (APP_ID == RISCV_ID) log_gr_interval -=2; // manually tuned
     //     if (log_gr_interval < 5) log_gr_interval = 5;
-
     // }
+
     mem[10] = log_gr_interval;
     mem[11] = ((1<<log_gr_interval) -1 )<<8;
     mem[12] = ~((1<<(log_gr_interval+8 ))-1);
@@ -324,9 +324,9 @@ int main() {
     int base_src_node = mem[7];
     int base_sink_node = mem[9];
 
-    node_prop = &mem[base_data] ;
-    edge_offset  = &mem[base_edge_offset];
-    edge_neighbors  = &mem[base_neighbor];
+    node_prop = (node_prop_t*)&mem[base_data] ;
+    edge_offset  = (uint*)&mem[base_edge_offset];
+    edge_neighbors  = (edge_prop_t*)&mem[base_neighbors];
     numV  = mem[1];
     src_node  = mem[7] ;
     sink_node  = mem[9] ;
