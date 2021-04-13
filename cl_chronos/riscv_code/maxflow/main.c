@@ -62,6 +62,10 @@ uint iteration_mask;
 uint src_node;
 uint sink_node;
 
+uint maxflow_global_relabel_trigger_mask;
+uint maxflow_global_relabel_trigger_inc = 16;
+uint transaction_id = 1;
+
 // if this bit is set in the ts, it corresponds to bfs starting from src
 const int bfs_src_ts_bit = 11;
 
@@ -85,6 +89,37 @@ typedef struct {
 edge_prop_t* edge_neighbors;
 
 
+uint convert_timestamp(uint original_ts) {
+  uint four_bit_tile_id = 0;// TILE_ID;
+  // bool is_transactional = true;
+  // bool task_enq_valid = true;
+  uint modified_task_enq_ts = original_ts;
+
+  // if (is_transactional & task_enq_valid & task_enq_ready & task_enq_data.ttype == 0) {
+    if ((transaction_id & maxflow_global_relabel_trigger_mask) == 0) {
+      transaction_id = transaction_id + maxflow_global_relabel_trigger_inc;
+    }
+    else {
+      // increasing timestamps
+      if ((original_ts>>4) > (transaction_id<<4 | four_bit_tile_id)) 
+        transaction_id = modified_task_enq_ts>>8 + 1;
+      else 
+        transaction_id = transaction_id + 1;
+    }
+  // }
+   
+  // if (is_transactional & task_enq_valid & (task_enq_data.ttype == 0)) {
+    if ((original_ts>>4) > (transaction_id<<4 | four_bit_tile_id)) 
+      modified_task_enq_ts = (original_ts>>8 + 1)<<8 | four_bit_tile_id<<4;
+    else 
+      modified_task_enq_ts = transaction_id<<8 | four_bit_tile_id<<4;
+  // }
+  // else { 
+  //    modified_task_enq_ts = original_ts;
+  // }
+  return modified_task_enq_ts;
+}
+
 void discharge_start_task(uint ts, uint vid, uint enq_start, uint arg1) {
 
    if ((ts & global_relabel_mask) == 0) {
@@ -96,7 +131,7 @@ void discharge_start_task(uint ts, uint vid, uint enq_start, uint arg1) {
           enq_task_arg1(GLOBAL_RELABEL_VISIT_TASK, ts | (1<<bfs_src_ts_bit), src, 0);
       }
       // reenqueue the original task
-      enq_task_arg1(DISCHARGE_START_TASK, ts, vid, 0);
+      enq_task_arg1(DISCHARGE_START_TASK, convert_timestamp(ts), vid, 0);
       return;
    }
    uint eo_begin = edge_offset[vid];
@@ -179,7 +214,7 @@ void push_from_task(uint ts, uint vid, uint neighbor_height, uint neighbor_id) {
       // conflict detection is at node level
       if (node_prop[vid].excess > 0) {
          node_prop[vid].height = min_neighbor + 1;
-         enq_task_arg2(DISCHARGE_START_TASK, ts, vid, 0, ts);
+         enq_task_arg2(DISCHARGE_START_TASK, convert_timestamp(ts), vid, 0, ts);
 
       } else {
 
@@ -201,7 +236,7 @@ void push_to_task(uint ts, uint vid, uint reverse_index, uint amt) {
 
    if (excess == 0 && (vid != src_node) && (vid != sink_node) ) {
       // Task unit should modify ts to a unique number
-      enq_task_arg2(DISCHARGE_START_TASK, ts, vid, 0, ts);
+      enq_task_arg2(DISCHARGE_START_TASK, convert_timestamp(ts), vid, 0, ts);
    } else {
    }
 }
@@ -340,7 +375,9 @@ int main() {
     global_relabel_mask = ((1<<(log_global_relabel_bits)) - 1 ) << (TX_ID_OFFSET_BITS);
     //global_relabel_mask = ~0;
 
-    enq_task_arg2(0,0,0,0,0);
+    maxflow_global_relabel_trigger_mask = (1<<mem[10]) - 1;
+
+    enq_task_arg2(0,convert_timestamp(0),0,0,0);
 #endif
 
 
