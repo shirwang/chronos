@@ -101,18 +101,18 @@ uint convert_timestamp(uint original_ts) {
     }
     else {
       // increasing timestamps
-      if ((original_ts>>4) > (transaction_id<<4 | four_bit_tile_id)) 
-        transaction_id = modified_task_enq_ts>>8 + 1;
+      if ((original_ts>>4) > ((transaction_id<<4) | four_bit_tile_id))
+        transaction_id = (modified_task_enq_ts>>8) + 1;
       else 
         transaction_id = transaction_id + 1;
     }
   // }
    
   // if (is_transactional & task_enq_valid & (task_enq_data.ttype == 0)) {
-    if ((original_ts>>4) > (transaction_id<<4 | four_bit_tile_id)) 
-      modified_task_enq_ts = (original_ts>>8 + 1)<<8 | four_bit_tile_id<<4;
+    if ((original_ts>>4) > ((transaction_id<<4) | four_bit_tile_id)) 
+      modified_task_enq_ts = (((original_ts>>8) + 1)<<8) | (four_bit_tile_id<<4);
     else 
-      modified_task_enq_ts = transaction_id<<8 | four_bit_tile_id<<4;
+      modified_task_enq_ts = (transaction_id<<8) | (four_bit_tile_id<<4);
   // }
   // else { 
   //    modified_task_enq_ts = original_ts;
