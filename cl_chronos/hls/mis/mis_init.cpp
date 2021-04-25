@@ -78,7 +78,7 @@ ALL TIMES.
 #define ENQUEUER_TASK 4
 
 
-void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hls::stream<undo_log_t>* undo_log_entry) {
+void mis_init (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hls::stream<undo_log_t>* undo_log_entry) {
 #pragma HLS PIPELINE II=15 enable_flush rewind
 #pragma HLS INTERFACE axis port=undo_log_entry
 #pragma HLS DATA_PACK variable=undo_log_entry
@@ -90,7 +90,7 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 	// HLS Does not support 64-bit addr
 	// https://forums.xilinx.com/t5/Vivado-High-Level-Synthesis-HLS/Simple-question-how-to-get-64bit-addresses-on-ALL-AXI-busses/td-p/669669
 
-//	int i;
+	int i;
 
 	static ap_uint<1> initialized = 0;
 	static ap_int<32> base_flags;
@@ -108,7 +108,6 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 	}
 
 	////////////////////////////// MIS //////////////////////////////
-	if (task_in.ttype == INITIAL_ENQUEUE_TASK) {
 		ap_uint<32> start_v = task_in.args.range(31,0);
 		//enqueue 7 exclude tasks
 	    ap_uint<32> v;
@@ -129,73 +128,8 @@ void mis_hls (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hl
 			task_t child = {task_in.ts, task_in.object, INITIAL_ENQUEUE_TASK, args_2};
 			task_out->write(child);
 	    }
-	}
-	if (task_in.ttype == EXCLUDE_TASK) {
-		ap_uint<32> vid = task_in.object;
-		ap_uint<32> ngh = task_in.args.range(31,0);
-		if (l1[base_flags+ngh] != 2) {
-			ap_uint<32> current_flag = l1[base_flags+ngh];
-			l1[base_flags+ngh] = 2;
-			// update undo log
-			undo_log_t ulog;
-			ulog.addr = (base_flags + ngh) << 2;
-			ulog.data = current_flag;
-			undo_log_entry->write(ulog);
-		}
-	}
-	if (task_in.ttype == TASK_TASK) {
-		ap_uint<32> vid = task_in.object;
-		ap_uint<32> cur_flag = l1[base_flags+vid];
-		if (cur_flag == 0) {
-			// update value
-			l1[base_flags +vid] = 1;
-			// update undo log
-			undo_log_t ulog;
-			ulog.addr = (base_flags + vid) << 2;
-			ulog.data = 0;
-			undo_log_entry->write(ulog);
-			//enqueue children task
-			ap_uint<64> args_2;
-			args_2.range(31,0) = 0;
-			args_2.range(63,32) = vid;
-			task_t child = {task_in.ts, task_in.object, ENQUEUER_TASK, args_2};
-			task_out->write(child);
-		}
-	}
-	if (task_in.ttype == FILTER_TASK) {
-		//this task is not used
-	}
-	if (task_in.ttype == ENQUEUER_TASK) {
-		ap_uint<32> vid = task_in.object;
-		ap_uint<32> start_n = task_in.args.range(31,0);
-		ap_uint<32> i = task_in.args.range(63,32);
 
-		ap_int<32> n = l1[base_degree +vid];
-		ap_int<32> ngh_cnt;
-
-	    //enqueue 7 exclude tasks
-	    for (ngh_cnt = start_n; ngh_cnt < start_n+7; ngh_cnt++) {
-	        if (ngh_cnt < n) {
-	            ap_uint<32> ngh = l1[base_neighbor + i*total_v + ngh_cnt];
-	        	//enqueue children task
-	        	ap_uint<64> args_2;
-	        	args_2.range(31,0) = ngh;
-				task_t child = {task_in.ts, ngh, EXCLUDE_TASK, args_2};
-				task_out->write(child);
-	        }
-	    }
-	    //enqueue 1 enqueuer task
-	    if (ngh_cnt < n) {
-	    	//enqueue children task
-			ap_uint<64> args_2;
-			args_2.range(31,0) = ngh_cnt;
-			args_2.range(63,32) = i;
-			task_t child = {task_in.ts, task_in.object, ENQUEUER_TASK, args_2};
-			task_out->write(child);
-	    }
-	}
 }
-
 
 
 
