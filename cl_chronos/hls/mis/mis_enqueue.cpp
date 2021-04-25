@@ -79,7 +79,7 @@ ALL TIMES.
 
 
 void mis_enqueue (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, hls::stream<undo_log_t>* undo_log_entry) {
-#pragma HLS PIPELINE II=15 enable_flush rewind
+//#pragma HLS PIPELINE II=15 enable_flush rewind
 #pragma HLS INTERFACE axis port=undo_log_entry
 #pragma HLS DATA_PACK variable=undo_log_entry
 #pragma HLS INTERFACE m_axi depth=1000 port=l1
