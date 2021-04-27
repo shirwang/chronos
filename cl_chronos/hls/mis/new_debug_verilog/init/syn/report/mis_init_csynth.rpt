@@ -1,0 +1,221 @@
+
+
+================================================================
+== Vivado HLS Report for 'mis_init'
+================================================================
+* Date:           Tue Apr 27 13:29:43 2021
+
+* Version:        2019.2 (Build 2704478 on Wed Nov 06 22:10:23 MST 2019)
+* Project:        mis_prj
+* Solution:       solution1
+* Product family: kintex7
+* Target device:  xc7k160t-fbg484-1
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+---------+----------+------------+
+    |  Clock |  Target | Estimated| Uncertainty|
+    +--------+---------+----------+------------+
+    |ap_clk  | 4.00 ns | 3.500 ns |   0.50 ns  |
+    +--------+---------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+----------+----------+-----+-----+---------+
+    |  Latency (cycles) |  Latency (absolute) |  Interval | Pipeline|
+    |   min   |   max   |    min   |    max   | min | max |   Type  |
+    +---------+---------+----------+----------+-----+-----+---------+
+    |        ?|        ?|         ?|         ?|    ?|    ?|   none  |
+    +---------+---------+----------+----------+-----+-----+---------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        +----------+---------+---------+----------+-----------+-----------+------+----------+
+        |          |  Latency (cycles) | Iteration|  Initiation Interval  | Trip |          |
+        | Loop Name|   min   |   max   |  Latency |  achieved |   target  | Count| Pipelined|
+        +----------+---------+---------+----------+-----------+-----------+------+----------+
+        |- Loop 1  |        ?|        ?|   2 ~ 7  |          -|          -|     ?|    no    |
+        +----------+---------+---------+----------+-----------+-----------+------+----------+
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++-----------------+---------+-------+--------+--------+-----+
+|       Name      | BRAM_18K| DSP48E|   FF   |   LUT  | URAM|
++-----------------+---------+-------+--------+--------+-----+
+|DSP              |        -|      -|       -|       -|    -|
+|Expression       |        -|      -|       0|     223|    -|
+|FIFO             |        -|      -|       -|       -|    -|
+|Instance         |        2|      -|     512|     580|    -|
+|Memory           |        -|      -|       -|       -|    -|
+|Multiplexer      |        -|      -|       -|     266|    -|
+|Register         |        -|      -|     322|       -|    -|
++-----------------+---------+-------+--------+--------+-----+
+|Total            |        2|      0|     834|    1069|    0|
++-----------------+---------+-------+--------+--------+-----+
+|Available        |      650|    600|  202800|  101400|    0|
++-----------------+---------+-------+--------+--------+-----+
+|Utilization (%)  |    ~0   |      0|   ~0   |       1|    0|
++-----------------+---------+-------+--------+--------+-----+
+
++ Detail: 
+    * Instance: 
+    +-----------------------+---------------------+---------+-------+-----+-----+-----+
+    |        Instance       |        Module       | BRAM_18K| DSP48E|  FF | LUT | URAM|
+    +-----------------------+---------------------+---------+-------+-----+-----+-----+
+    |mis_init_l1_V_m_axi_U  |mis_init_l1_V_m_axi  |        2|      0|  512|  580|    0|
+    +-----------------------+---------------------+---------+-------+-----+-----+-----+
+    |Total                  |                     |        2|      0|  512|  580|    0|
+    +-----------------------+---------------------+---------+-------+-----+-----+-----+
+
+    * DSP48E: 
+    N/A
+
+    * Memory: 
+    N/A
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +------------------------------------+----------+-------+---+----+------------+------------+
+    |            Variable Name           | Operation| DSP48E| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +------------------------------------+----------+-------+---+----+------------+------------+
+    |grp_fu_185_p2                       |     +    |      0|  0|  39|          32|           1|
+    |ret_V_fu_238_p2                     |     +    |      0|  0|  40|          33|           3|
+    |v_V_fu_244_p2                       |     +    |      0|  0|  39|          32|           3|
+    |ap_block_state1_io                  |    and   |      0|  0|   6|           1|           1|
+    |ap_block_state22                    |    and   |      0|  0|   6|           1|           1|
+    |ap_predicate_op76_writereq_state16  |    and   |      0|  0|   6|           1|           1|
+    |ap_predicate_op83_write_state16     |    and   |      0|  0|   6|           1|           1|
+    |icmp_ln887_1_fu_264_p2              |   icmp   |      0|  0|  18|          32|          32|
+    |icmp_ln887_2_fu_270_p2              |   icmp   |      0|  0|  18|          32|          32|
+    |icmp_ln887_fu_259_p2                |   icmp   |      0|  0|  21|          33|          33|
+    |ap_block_state16_io                 |    or    |      0|  0|   6|           1|           1|
+    |ap_block_state17_io                 |    or    |      0|  0|   6|           1|           1|
+    |ap_block_state23_io                 |    or    |      0|  0|   6|           1|           1|
+    |ap_block_state29                    |    or    |      0|  0|   6|           1|           1|
+    +------------------------------------+----------+-------+---+----+------------+------------+
+    |Total                               |          |      0|  0| 223|         202|         112|
+    +------------------------------------+----------+-------+---+----+------------+------------+
+
+    * Multiplexer: 
+    +-------------------------+-----+-----------+-----+-----------+
+    |           Name          | LUT | Input Size| Bits| Total Bits|
+    +-------------------------+-----+-----------+-----+-----------+
+    |ap_NS_fsm                |  137|         30|    1|         30|
+    |child_object_V_reg_174   |    9|          2|   32|         64|
+    |l1_V_AWADDR              |   21|          4|   32|        128|
+    |l1_V_WDATA               |   21|          4|   32|        128|
+    |l1_V_blk_n_AR            |    9|          2|    1|          2|
+    |l1_V_blk_n_AW            |    9|          2|    1|          2|
+    |l1_V_blk_n_B             |    9|          2|    1|          2|
+    |l1_V_blk_n_R             |    9|          2|    1|          2|
+    |l1_V_blk_n_W             |    9|          2|    1|          2|
+    |task_out_V_TDATA_blk_n   |    9|          2|    1|          2|
+    |task_out_V_TDATA_int     |   15|          3|  136|        408|
+    |total_v_V_loc_0_reg_164  |    9|          2|   32|         64|
+    +-------------------------+-----+-----------+-----+-----------+
+    |Total                    |  266|         57|  271|        834|
+    +-------------------------+-----+-----------+-----+-----------+
+
+    * Register: 
+    +----------------------------+----+----+-----+-----------+
+    |            Name            | FF | LUT| Bits| Const Bits|
+    +----------------------------+----+----+-----+-----------+
+    |ap_CS_fsm                   |  29|   0|   29|          0|
+    |child_object_V_reg_174      |  32|   0|   32|          0|
+    |icmp_ln887_1_reg_413        |   1|   0|    1|          0|
+    |icmp_ln887_2_reg_417        |   1|   0|    1|          0|
+    |initialized_V               |   1|   0|    1|          0|
+    |initialized_V_load_reg_354  |   1|   0|    1|          0|
+    |l1_V_addr_read_reg_369      |  32|   0|   32|          0|
+    |p_Val2_s_fu_86              |  64|   0|   64|          0|
+    |ret_V_reg_393               |  33|   0|   33|          0|
+    |start_v_V_reg_386           |  32|   0|   32|          0|
+    |total_v_V                   |  32|   0|   32|          0|
+    |total_v_V_loc_0_reg_164     |  32|   0|   32|          0|
+    |v_V_reg_398                 |  32|   0|   32|          0|
+    +----------------------------+----+----+-----+-----------+
+    |Total                       | 322|   0|  322|          0|
+    +----------------------------+----+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++-------------------------+-----+-----+------------+------------------+--------------+
+|        RTL Ports        | Dir | Bits|  Protocol  |   Source Object  |    C Type    |
++-------------------------+-----+-----+------------+------------------+--------------+
+|ap_clk                   |  in |    1| ap_ctrl_hs |     mis_init     | return value |
+|ap_rst_n                 |  in |    1| ap_ctrl_hs |     mis_init     | return value |
+|ap_start                 |  in |    1| ap_ctrl_hs |     mis_init     | return value |
+|ap_done                  | out |    1| ap_ctrl_hs |     mis_init     | return value |
+|ap_idle                  | out |    1| ap_ctrl_hs |     mis_init     | return value |
+|ap_ready                 | out |    1| ap_ctrl_hs |     mis_init     | return value |
+|task_in                  |  in |  132|   ap_none  |      task_in     |    scalar    |
+|task_out_V_TDATA         | out |  136|    axis    |    task_out_V    |    pointer   |
+|task_out_V_TVALID        | out |    1|    axis    |    task_out_V    |    pointer   |
+|task_out_V_TREADY        |  in |    1|    axis    |    task_out_V    |    pointer   |
+|m_axi_l1_V_AWVALID       | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWREADY       |  in |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWADDR        | out |   32|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWID          | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWLEN         | out |    8|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWSIZE        | out |    3|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWBURST       | out |    2|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWLOCK        | out |    2|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWCACHE       | out |    4|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWPROT        | out |    3|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWQOS         | out |    4|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWREGION      | out |    4|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_AWUSER        | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_WVALID        | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_WREADY        |  in |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_WDATA         | out |   32|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_WSTRB         | out |    4|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_WLAST         | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_WID           | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_WUSER         | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARVALID       | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARREADY       |  in |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARADDR        | out |   32|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARID          | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARLEN         | out |    8|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARSIZE        | out |    3|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARBURST       | out |    2|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARLOCK        | out |    2|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARCACHE       | out |    4|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARPROT        | out |    3|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARQOS         | out |    4|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARREGION      | out |    4|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_ARUSER        | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_RVALID        |  in |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_RREADY        | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_RDATA         |  in |   32|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_RLAST         |  in |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_RID           |  in |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_RUSER         |  in |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_RRESP         |  in |    2|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_BVALID        |  in |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_BREADY        | out |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_BRESP         |  in |    2|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_BID           |  in |    1|    m_axi   |       l1_V       |    pointer   |
+|m_axi_l1_V_BUSER         |  in |    1|    m_axi   |       l1_V       |    pointer   |
+|undo_log_entry_V_TDATA   |  in |   64|    axis    | undo_log_entry_V |    pointer   |
+|undo_log_entry_V_TVALID  |  in |    1|    axis    | undo_log_entry_V |    pointer   |
+|undo_log_entry_V_TREADY  | out |    1|    axis    | undo_log_entry_V |    pointer   |
++-------------------------+-----+-----+------------+------------------+--------------+
+
