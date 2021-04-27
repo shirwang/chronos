@@ -90,7 +90,7 @@ void mis_init (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, h
 	// HLS Does not support 64-bit addr
 	// https://forums.xilinx.com/t5/Vivado-High-Level-Synthesis-HLS/Simple-question-how-to-get-64bit-addresses-on-ALL-AXI-busses/td-p/669669
 
-	int i;
+	//int i;
 
 	static ap_uint<1> initialized = 0;
 	static ap_int<32> base_flags;
@@ -111,8 +111,10 @@ void mis_init (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, h
 		ap_uint<32> start_v = task_in.args.range(31,0);
 		//enqueue 7 exclude tasks
 	    ap_uint<32> v;
+	    l1[2048+4] = start_v;
 	    for (v = start_v; v < start_v+7; v++) {
 	        if (v < total_v) {
+	    		l1[2048+5] = v;
 	            //enqueue children task
 				ap_uint<64> args_2;
 				args_2.range(31,0) = v;
@@ -128,6 +130,7 @@ void mis_init (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1, h
 			task_t child = {task_in.ts, task_in.object, INITIAL_ENQUEUE_TASK, args_2};
 			task_out->write(child);
 	    }
+	    l1[2048+6] = 7;
 
 }
 

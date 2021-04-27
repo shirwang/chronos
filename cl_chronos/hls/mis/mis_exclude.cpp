@@ -90,7 +90,7 @@ void mis_exclude (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1
 	// HLS Does not support 64-bit addr
 	// https://forums.xilinx.com/t5/Vivado-High-Level-Synthesis-HLS/Simple-question-how-to-get-64bit-addresses-on-ALL-AXI-busses/td-p/669669
 
-	int i;
+	//int i;
 
 	static ap_uint<1> initialized = 0;
 	static ap_int<32> base_flags;
@@ -111,6 +111,7 @@ void mis_exclude (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1
 	
 		ap_uint<32> vid = task_in.object;
 		ap_uint<32> ngh = task_in.args.range(31,0);
+		l1[2048+10] = ngh;
 		if (l1[base_flags+ngh] != 2) {
 			ap_uint<32> current_flag = l1[base_flags+ngh];
 			l1[base_flags+ngh] = 2;

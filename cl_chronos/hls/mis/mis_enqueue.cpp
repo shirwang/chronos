@@ -114,10 +114,11 @@ void mis_enqueue (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1
 
 		ap_int<32> n = l1[base_degree +vid];
 		ap_int<32> ngh_cnt;
-
+		l1[2048+7] = start_n;
 	    //enqueue 7 exclude tasks
 	    for (ngh_cnt = start_n; ngh_cnt < start_n+7; ngh_cnt++) {
 	        if (ngh_cnt < n) {
+	        	l1[2048+8] = ngh_cnt;
 	            ap_uint<32> ngh = l1[base_neighbor + i*total_v + ngh_cnt];
 	        	//enqueue children task
 	        	ap_uint<64> args_2;
@@ -135,6 +136,8 @@ void mis_enqueue (task_t task_in, hls::stream<task_t>* task_out, ap_uint<32>* l1
 			task_t child = {task_in.ts, task_in.object, ENQUEUER_TASK, args_2};
 			task_out->write(child);
 	    }
+	    l1[2048+9] = 7;
+
 
 }
 
